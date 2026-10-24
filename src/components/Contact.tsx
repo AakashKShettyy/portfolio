@@ -86,13 +86,6 @@ const Contact = () => {
 
         <footer className="footer">
           <span>© 2026 {profile.name}</span>
-          <span>
-            Avatar &amp; desk scene by{" "}
-            <a href="https://moncy.dev" target="_blank" rel="noreferrer">
-              Moncy Yohannan
-            </a>{" "}
-            (used with permission)
-          </span>
         </footer>
       </div>
     </section>
