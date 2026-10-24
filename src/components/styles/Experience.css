@@ -1,0 +1,191 @@
+.exp-title {
+  margin-top: 28px;
+  font-size: clamp(40px, 6.4vw, 104px);
+  max-width: 900px;
+}
+.exp-layout {
+  margin-top: clamp(56px, 8vw, 110px);
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.5fr);
+  gap: clamp(32px, 6vw, 96px);
+  align-items: start;
+}
+.exp-company-wrap {
+  position: sticky;
+  top: 130px;
+}
+.exp-company {
+  padding: clamp(24px, 2.6vw, 36px);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(18, 21, 28, 0.9), rgba(9, 11, 15, 0.9));
+}
+.exp-company-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.exp-company-name {
+  margin-top: 16px;
+  font-size: clamp(30px, 3vw, 46px);
+  line-height: 1.02;
+}
+.exp-company-div {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.exp-company dl {
+  margin: 28px 0 0;
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
+}
+.exp-company dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.exp-company dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.exp-company dd {
+  margin: 0;
+  font-size: 14px;
+  text-align: right;
+}
+
+.exp-roles {
+  position: relative;
+  padding-left: 40px;
+  display: grid;
+  gap: clamp(48px, 6vw, 84px);
+}
+.exp-line {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 4px;
+  width: 1px;
+  background: var(--line);
+}
+.exp-line i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--accent), var(--accent-deep));
+  transform-origin: top;
+  box-shadow: 0 0 14px rgb(var(--accent-rgb) / 0.6);
+}
+.exp-role-card {
+  position: relative;
+}
+.exp-dot {
+  position: absolute;
+  top: 6px;
+  left: -40px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 0 4px var(--bg);
+}
+.exp-period {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.exp-role {
+  margin-top: 10px;
+  font-size: clamp(32px, 3.6vw, 56px);
+  line-height: 1.02;
+}
+.exp-summary {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.exp-bullets {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.exp-bullets li {
+  position: relative;
+  padding-left: 22px;
+  color: #aab2c0;
+  line-height: 1.7;
+  font-size: 15px;
+}
+.exp-bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 8px;
+  height: 1px;
+  background: var(--accent);
+}
+.exp-tech {
+  margin-top: 24px;
+}
+.exp-projects {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.exp-projects > span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 6px;
+}
+.exp-projects button {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--accent-rgb) / 0.4);
+  color: var(--accent-bright);
+  font-size: 12.5px;
+  transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
+}
+.exp-projects button:hover {
+  background: var(--accent);
+  color: #07080b;
+}
+.exp-projects button i {
+  font-style: normal;
+  opacity: 0.7;
+}
+
+@media (max-width: 900px) {
+  .exp-layout {
+    grid-template-columns: 1fr;
+  }
+  .exp-company-wrap {
+    position: static;
+  }
+}
+@media (max-width: 600px) {
+  .exp-roles {
+    padding-left: 28px;
+  }
+  .exp-dot {
+    left: -28px;
+  }
+}

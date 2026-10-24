@@ -1,0 +1,97 @@
+/* The colour world: a radial gradient lit from the centre, driven by CSS
+   variables that GSAP tweens when the world switches. */
+.world-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    circle at 50% 46%,
+    var(--bg-inner) 0%,
+    var(--bg-mid) 50%,
+    var(--bg-outer) 100%
+  );
+  pointer-events: none;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.stage canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* R3F forces pointer-events:auto on its wrapper; the 3D layers are decoration
+   (pointer position is read from window), so they must never catch clicks. */
+.stage,
+.stage *,
+.overlay,
+.overlay * {
+  pointer-events: none !important;
+}
+
+/* Foreground tokens, above all page text. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  pointer-events: none;
+}
+.overlay canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Rising light motes (the bubbles). */
+.motes {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.mote {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.85),
+    rgba(255, 255, 255, 0.18) 55%,
+    rgba(255, 255, 255, 0) 72%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+@keyframes moteUp {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--o, 0.4);
+  }
+  90% {
+    opacity: var(--o, 0.4);
+  }
+  100% {
+    transform: translate3d(30px, -110vh, 0);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(2, 10, 12, 0) 0%,
+      rgba(2, 10, 12, 0) 38%,
+      rgba(2, 10, 12, 0.7) 58%,
+      rgba(2, 10, 12, 0.9) 100%
+    );
+  }
+}

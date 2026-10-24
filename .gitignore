@@ -26,3 +26,20 @@ dist-ssr
 
 backup/
 .env
+
+# Ruflo local secrets and runtime data
+.env.local
+.env.*.local
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/sessions/
+
+# Local AI tooling and personal files that should not be deployed
+.agents/
+.claude/
+.claude-flow/
+.swarm/
+.mcp.json
+skills-lock.json
+/Aakash_Shetty_Resume_with_projects.docx
+tsconfig.*.tsbuildinfo

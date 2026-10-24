@@ -1,213 +1,233 @@
 import * as THREE from "three";
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
-import { EffectComposer, N8AO } from "@react-three/postprocessing";
+import { Environment, Lightformer } from "@react-three/drei";
 import {
   BallCollider,
   Physics,
-  RigidBody,
-  CylinderCollider,
   RapierRigidBody,
+  RigidBody,
 } from "@react-three/rapier";
+import { skillBalls } from "../data/content";
+import { Reveal, SplitReveal } from "./motion/Reveal";
+import { palette } from "../lib/palette";
+import "./styles/TechStack.css";
 
-const textureLoader = new THREE.TextureLoader();
-const imageUrls = [
-  "/images/react2.webp",
-  "/images/next2.webp",
-  "/images/node2.webp",
-  "/images/express.webp",
-  "/images/mongo.webp",
-  "/images/mysql.webp",
-  "/images/typescript.webp",
-  "/images/javascript.webp",
-];
-const textures = imageUrls.map((url) => textureLoader.load(url));
+const sphereGeometry = new THREE.SphereGeometry(1, 40, 40);
 
-const sphereGeometry = new THREE.SphereGeometry(1, 28, 28);
-
-const spheres = [...Array(30)].map(() => ({
-  scale: [0.7, 1, 0.8, 1, 1][Math.floor(Math.random() * 5)],
-}));
-
-type SphereProps = {
-  vec?: THREE.Vector3;
-  scale: number;
-  r?: typeof THREE.MathUtils.randFloatSpread;
-  material: THREE.MeshPhysicalMaterial;
-  isActive: boolean;
+// Gunmetal ball with an accent ring and the skill name, drawn on a canvas.
+const makeLabelTexture = (label: string) => {
+  const size = 512;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const g = c.getContext("2d")!;
+  const bg = g.createRadialGradient(size * 0.4, size * 0.35, 20, size / 2, size / 2, size * 0.75);
+  bg.addColorStop(0, palette.ballTop);
+  bg.addColorStop(1, palette.ballBottom);
+  g.fillStyle = bg;
+  g.fillRect(0, 0, size, size);
+  g.strokeStyle = palette.accent;
+  g.lineWidth = 7;
+  g.globalAlpha = 0.9;
+  g.beginPath();
+  g.arc(size / 2, size / 2, size * 0.34, 0, Math.PI * 2);
+  g.stroke();
+  g.globalAlpha = 1;
+  g.fillStyle = palette.ink;
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  let fontSize = 74;
+  g.font = `italic 400 ${fontSize}px "Instrument Serif", Georgia, serif`;
+  while (g.measureText(label).width > size * 0.54 && fontSize > 30) {
+    fontSize -= 4;
+    g.font = `italic 400 ${fontSize}px "Instrument Serif", Georgia, serif`;
+  }
+  g.fillText(label, size / 2, size / 2 + 4);
+  const texture = new THREE.CanvasTexture(c);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  return texture;
 };
 
-function SphereGeo({
-  vec = new THREE.Vector3(),
-  scale,
-  r = THREE.MathUtils.randFloatSpread,
-  material,
-  isActive,
-}: SphereProps) {
+type BallProps = {
+  scale: number;
+  material: THREE.Material;
+  position: [number, number, number];
+  active: boolean;
+};
+
+const Ball = ({ scale, material, position, active }: BallProps) => {
   const api = useRef<RapierRigidBody | null>(null);
+  const vec = useMemo(() => new THREE.Vector3(), []);
 
-  useFrame((_state, delta) => {
-    if (!isActive) return;
-    delta = Math.min(0.1, delta);
-    const impulse = vec
-      .copy(api.current!.translation())
+  // Gentle pull toward the centre so the cluster stays together.
+  useFrame((_s, delta) => {
+    if (!active || !api.current) return;
+    const d = Math.min(0.1, delta);
+    vec
+      .copy(api.current.translation())
       .normalize()
-      .multiply(
-        new THREE.Vector3(
-          -50 * delta * scale,
-          -150 * delta * scale,
-          -50 * delta * scale
-        )
-      );
-
-    api.current?.applyImpulse(impulse, true);
+      .multiplyScalar(-90 * d * scale);
+    api.current.applyImpulse(vec, true);
   });
 
   return (
     <RigidBody
-      linearDamping={0.75}
-      angularDamping={0.15}
-      friction={0.2}
-      position={[r(20), r(20) - 25, r(20) - 10]}
       ref={api}
       colliders={false}
+      position={position}
+      linearDamping={0.8}
+      angularDamping={0.2}
+      friction={0.2}
     >
       <BallCollider args={[scale]} />
-      <CylinderCollider
-        rotation={[Math.PI / 2, 0, 0]}
-        position={[0, 0, 1.2 * scale]}
-        args={[0.15 * scale, 0.275 * scale]}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        scale={scale}
-        geometry={sphereGeometry}
-        material={material}
-        rotation={[0.3, 1, 1]}
-      />
+      <mesh scale={scale} geometry={sphereGeometry} material={material} rotation={[0.3, 1, 0.4]} />
     </RigidBody>
   );
-}
-
-type PointerProps = {
-  vec?: THREE.Vector3;
-  isActive: boolean;
 };
 
-function Pointer({ vec = new THREE.Vector3(), isActive }: PointerProps) {
+const Pointer = ({ active }: { active: boolean }) => {
   const ref = useRef<RapierRigidBody>(null);
-
+  const vec = useMemo(() => new THREE.Vector3(), []);
   useFrame(({ pointer, viewport }) => {
-    if (!isActive) return;
-    const targetVec = vec.lerp(
-      new THREE.Vector3(
-        (pointer.x * viewport.width) / 2,
-        (pointer.y * viewport.height) / 2,
-        0
-      ),
+    if (!active) return;
+    vec.lerp(
+      new THREE.Vector3((pointer.x * viewport.width) / 2, (pointer.y * viewport.height) / 2, 0),
       0.2
     );
-    ref.current?.setNextKinematicTranslation(targetVec);
+    ref.current?.setNextKinematicTranslation(vec);
   });
-
   return (
-    <RigidBody
-      position={[100, 100, 100]}
-      type="kinematicPosition"
-      colliders={false}
-      ref={ref}
-    >
-      <BallCollider args={[2]} />
+    <RigidBody ref={ref} type="kinematicPosition" colliders={false} position={[100, 100, 100]}>
+      <BallCollider args={[2.2]} />
     </RigidBody>
   );
-}
+};
 
-const TechStack = () => {
-  const [isActive, setIsActive] = useState(false);
+const Pit = ({ active }: { active: boolean }) => {
+  const [materials, setMaterials] = useState<THREE.MeshPhysicalMaterial[]>([]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      const threshold = document
-        .getElementById("work")!
-        .getBoundingClientRect().top;
-      setIsActive(scrollY > threshold);
+    let cancelled = false;
+    const build = () => {
+      if (cancelled) return;
+      setMaterials(
+        skillBalls.map((label) => {
+          const map = makeLabelTexture(label);
+          return new THREE.MeshPhysicalMaterial({
+            map,
+            roughness: 0.35,
+            metalness: 0.35,
+            clearcoat: 0.6,
+            clearcoatRoughness: 0.2,
+            envMapIntensity: 0.9,
+          });
+        })
+      );
     };
-    document.querySelectorAll(".header a").forEach((elem) => {
-      const element = elem as HTMLAnchorElement;
-      element.addEventListener("click", () => {
-        const interval = setInterval(() => {
-          handleScroll();
-        }, 10);
-        setTimeout(() => {
-          clearInterval(interval);
-        }, 1000);
-      });
-    });
-    window.addEventListener("scroll", handleScroll);
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+    if (fonts) fonts.ready.then(build);
+    else build();
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      cancelled = true;
     };
   }, []);
-  const materials = useMemo(() => {
-    return textures.map(
-      (texture) =>
-        new THREE.MeshPhysicalMaterial({
-          map: texture,
-          emissive: "#ffffff",
-          emissiveMap: texture,
-          emissiveIntensity: 0.3,
-          metalness: 0.5,
-          roughness: 1,
-          clearcoat: 0.1,
-        })
-    );
+
+  const balls = useMemo(
+    () =>
+      [...Array(26)].map((_, i) => ({
+        scale: [0.8, 1, 0.9, 1.1, 1][Math.floor(Math.random() * 5)],
+        position: [
+          THREE.MathUtils.randFloatSpread(18),
+          THREE.MathUtils.randFloatSpread(18) - 22,
+          THREE.MathUtils.randFloatSpread(8) - 4,
+        ] as [number, number, number],
+        label: i % skillBalls.length,
+      })),
+    []
+  );
+
+  if (!materials.length) return null;
+  return (
+    <Physics gravity={[0, 0, 0]}>
+      <Pointer active={active} />
+      {balls.map((b, i) => (
+        <Ball
+          key={i}
+          scale={b.scale}
+          position={b.position}
+          material={materials[b.label]}
+          active={active}
+        />
+      ))}
+    </Physics>
+  );
+};
+
+const TechStack = () => {
+  const wrapper = useRef<HTMLElement>(null);
+  const [active, setActive] = useState(false);
+  const [desktop, setDesktop] = useState(window.innerWidth > 1024);
+
+  useEffect(() => {
+    const onResize = () => setDesktop(window.innerWidth > 1024);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const el = wrapper.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setActive(e.isIntersecting), {
+      threshold: 0.15,
+    });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   return (
-    <div className="techstack">
-      <h2> My Techstack</h2>
+    <section id="stack" className="techstack" ref={wrapper} aria-label="Tech stack">
+      <div className="techstack-copy wrap">
+        <Reveal>
+          <span className="eyebrow">Stack</span>
+        </Reveal>
+        <SplitReveal
+          as="h2"
+          className="display techstack-title"
+          text="Tools I *reach* for."
+        />
+        {desktop && (
+          <Reveal delay={0.2}>
+            <p className="techstack-hint">Move your cursor through them.</p>
+          </Reveal>
+        )}
+      </div>
 
-      <Canvas
-        shadows
-        gl={{ alpha: true, stencil: false, depth: false, antialias: false }}
-        camera={{ position: [0, 0, 20], fov: 32.5, near: 1, far: 100 }}
-        onCreated={(state) => (state.gl.toneMappingExposure = 1.5)}
-        className="tech-canvas"
-      >
-        <ambientLight intensity={1} />
-        <spotLight
-          position={[20, 20, 25]}
-          penumbra={1}
-          angle={0.2}
-          color="white"
-          castShadow
-          shadow-mapSize={[512, 512]}
-        />
-        <directionalLight position={[0, 5, -4]} intensity={2} />
-        <Physics gravity={[0, 0, 0]}>
-          <Pointer isActive={isActive} />
-          {spheres.map((props, i) => (
-            <SphereGeo
-              key={i}
-              {...props}
-              material={materials[Math.floor(Math.random() * materials.length)]}
-              isActive={isActive}
-            />
+      {desktop ? (
+        <Canvas
+          className="techstack-canvas"
+          frameloop={active ? "always" : "never"}
+          dpr={[1, 1.75]}
+          camera={{ position: [0, 0, 22], fov: 32.5, near: 1, far: 100 }}
+          gl={{ alpha: true, antialias: true }}
+        >
+          <ambientLight intensity={0.8} />
+          <directionalLight position={[8, 10, 12]} intensity={2.2} color={palette.keyLight} />
+          <Pit active={active} />
+          <Environment resolution={128} frames={1}>
+            <Lightformer form="rect" intensity={4} position={[0, 6, 6]} scale={[14, 5, 1]} color={palette.keyLight} />
+            <Lightformer form="ring" intensity={3} position={[-6, 0, 4]} scale={5} color={palette.accent} />
+            <Lightformer form="rect" intensity={2} position={[6, -3, 4]} scale={[6, 6, 1]} color="#ffffff" />
+          </Environment>
+        </Canvas>
+      ) : (
+        <ul className="chips techstack-chips wrap">
+          {skillBalls.map((s) => (
+            <li key={s}>{s}</li>
           ))}
-        </Physics>
-        <Environment
-          files="/models/char_enviorment.hdr"
-          environmentIntensity={0.5}
-          environmentRotation={[0, 4, 2]}
-        />
-        <EffectComposer enableNormalPass={false}>
-          <N8AO color="#0f002c" aoRadius={2} intensity={1.15} />
-        </EffectComposer>
-      </Canvas>
-    </div>
+        </ul>
+      )}
+    </section>
   );
 };
 
