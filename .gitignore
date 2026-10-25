@@ -43,3 +43,7 @@ backup/
 skills-lock.json
 /Aakash_Shetty_Resume_with_projects.docx
 tsconfig.*.tsbuildinfo
+
+# Local résumé working copies (the public résumé lives in public/)
+/Aakash_Shetty_Resume*.docx
+/Aakash_Shetty_Resume*.pdf
