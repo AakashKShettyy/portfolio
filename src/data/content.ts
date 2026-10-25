@@ -14,7 +14,7 @@ export const profile = {
   phoneHref: "tel:+918097523767",
   github: "https://github.com/aakash-shetty",
   linkedin: "https://www.linkedin.com/in/aakash-shettys",
-  resume: "/Aakash_Shetty_Resume.docx",
+  resume: "/Aakash_Shetty_Resume.pdf",
 };
 
 export const about = {
