@@ -17,13 +17,6 @@ export const profile = {
   resume: "/Aakash_Shetty_Resume.docx",
 };
 
-export const metrics = [
-  { value: 3000, suffix: "+", label: "Employees use my AI assistant across 3 countries" },
-  { value: 90, suffix: "%", label: "Faster responses after re-architecting the core" },
-  { value: 1.6, suffix: "M+", label: "Shipment records answerable in plain English", decimals: 1 },
-  { value: 91, suffix: "%", label: "Accuracy routing ~200 emails every day" },
-];
-
 export const about = {
   statement:
     "Full stack developer who treats *AI* as a product feature, not a demo.",

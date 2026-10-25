@@ -11,7 +11,6 @@ import Stage from "./stage/Stage";
 import Overlay from "./stage/Overlay";
 import Motes from "./stage/Motes";
 import { startScrollSync } from "./stage/sync";
-import Metrics from "./components/Metrics";
 import About from "./components/About";
 import Experience from "./components/Experience";
 import Projects from "./components/Projects";
@@ -49,7 +48,6 @@ const App = () => {
       <SmoothScroll>
         <main>
           <Hero />
-          <Metrics />
           <About />
           <Experience />
           <Projects />
