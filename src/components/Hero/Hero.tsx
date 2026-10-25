@@ -8,12 +8,12 @@ import { nextWorld, switchWorld, useWorld, worlds, type WorldId } from "../../st
 import { propPNG } from "../../stage/props3d";
 import "../styles/Hero.css";
 
-// One card per colour world (the "flavours"). The lead project and its metric
-// sit where Soda shows the product and price.
+// One card per colour world (the "flavours"). A headline number sits where Soda
+// shows the price; project names live in Experience and Work, not here.
 const cards: { id: WorldId; token: string; name: string; metric: string }[] = [
-  { id: "enterprise", token: "chat", name: "Enterprise AI", metric: "ELMA · 90% faster" },
-  { id: "automation", token: "document", name: "Automation", metric: "ACE · 25 → 3 min" },
-  { id: "personal", token: "shield", name: "Personal", metric: "Verity · 0 unsafe" },
+  { id: "enterprise", token: "chat", name: "Enterprise AI", metric: "90% faster responses" },
+  { id: "automation", token: "document", name: "Automation", metric: "25 → 3 min per invoice" },
+  { id: "personal", token: "shield", name: "Personal", metric: "0 unsafe actions" },
 ];
 
 const Hero = () => {
@@ -58,8 +58,8 @@ const Hero = () => {
               </svg>
             </span>
             <span className="hero-badge-text">
-              <strong>ELMA 2.0</strong>
-              <span>AI assistant live at Allcargo</span>
+              <strong>Data Scientist</strong>
+              <span>Allcargo Global · Mumbai</span>
             </span>
           </div>
         </Reveal>
